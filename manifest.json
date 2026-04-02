@@ -1,0 +1,10 @@
+{
+  "name": "Zero Today's New Cards",
+  "mod": 1774047600,
+  "min_anki_version": "2.1.49",
+  "max_anki_version": "2.1.*",
+  "author": "Elvis Sik",
+  "version": "0.1.0",
+  "description": "Adds a one-click action to set Today only new cards/day to 0 across all regular decks.",
+  "homepage": ""
+}
