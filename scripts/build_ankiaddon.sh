@@ -9,7 +9,7 @@ if ! command -v zip >/dev/null 2>&1; then
 fi
 
 out_dir="${1:-"$repo_root/dist"}"
-out_file="${2:-"zero-today-new.ankiaddon"}"
+out_file="${2:-"study-triage.ankiaddon"}"
 
 mkdir -p "$out_dir"
 tmpdir="$(mktemp -d)"

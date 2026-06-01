@@ -1,10 +1,11 @@
 {
-  "name": "Zero Today's New Cards",
-  "mod": 1774047600,
-  "min_anki_version": "2.1.49",
-  "max_anki_version": "2.1.*",
+  "package": "study_triage",
+  "name": "Study Triage",
+  "mod": 1780327281,
+  "min_point_version": 55,
+  "max_point_version": 250902,
   "author": "Elvis Sik",
-  "version": "0.1.0",
-  "description": "Adds a one-click action to set Today only new cards/day to 0 across all regular decks.",
+  "human_version": "0.3.9",
+  "description": "Adds quick actions to zero new cards or answer due cards as Good/Easy for a collection or selected deck.",
   "homepage": ""
 }
