@@ -7,7 +7,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-05-29T02:07:49.261731Z"
+exclude-newer = "2026-05-29T02:19:44.908567Z"
 exclude-newer-span = "P7D"
 
 [[package]]
@@ -20,12 +20,12 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "gui-agent-workbench", marker = "extra == 'gui'", editable = "../gui-agent-workbench" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.0" },
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0" },
+    { name = "tomli", marker = "extra == 'dev'", specifier = ">=2.0" },
 ]
-provides-extras = ["gui", "dev"]
+provides-extras = ["dev"]
 
 [[package]]
 name = "ast-serialize"
