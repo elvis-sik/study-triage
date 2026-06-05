@@ -7,7 +7,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-05-29T01:46:21.187661Z"
+exclude-newer = "2026-05-29T02:07:49.261731Z"
 exclude-newer-span = "P7D"
 
 [[package]]
@@ -15,18 +15,17 @@ name = "anki-addon-workbench"
 version = "0.1.0"
 source = { editable = "../anki-addon-workbench" }
 dependencies = [
-    { name = "gui-agent-workbench" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "gui-agent-workbench", editable = "../gui-agent-workbench" },
+    { name = "gui-agent-workbench", marker = "extra == 'gui'", editable = "../gui-agent-workbench" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.0" },
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["gui", "dev"]
 
 [[package]]
 name = "ast-serialize"
@@ -276,6 +275,7 @@ source = { virtual = "." }
 [package.optional-dependencies]
 dev = [
     { name = "anki-addon-workbench" },
+    { name = "gui-agent-workbench" },
     { name = "mypy" },
     { name = "ruff" },
 ]
@@ -283,6 +283,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "anki-addon-workbench", marker = "extra == 'dev'", editable = "../anki-addon-workbench" },
+    { name = "gui-agent-workbench", marker = "extra == 'dev'", editable = "../gui-agent-workbench" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.0" },
 ]

@@ -8,6 +8,7 @@ dependencies = []
 [project.optional-dependencies]
 dev = [
   "anki-addon-workbench>=0.1.0",
+  "gui-agent-workbench>=0.1.0",
   "mypy>=1.13.0",
   "ruff>=0.6.0",
 ]
