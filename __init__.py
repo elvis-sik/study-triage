@@ -63,17 +63,17 @@ def _add_deck_options_menu_item(menu, deck_id: int) -> None:
     if mw is None or mw.col is None:
         return
 
-    deck_id = _normalize_deck_id(deck_id)
-    if deck_id is None:
+    normalized_deck_id = _normalize_deck_id(deck_id)
+    if normalized_deck_id is None:
         return
 
-    deck = _get_deck(mw.col, deck_id)
+    deck = _get_deck(mw.col, normalized_deck_id)
     if not isinstance(deck, dict):
         return
 
     menu.addSeparator()
     submenu = menu.addMenu(MENU_LABEL)
-    _add_triage_actions(submenu, deck_id)
+    _add_triage_actions(submenu, normalized_deck_id)
 
 
 def _add_triage_actions(menu, deck_id: Optional[int] = None) -> None:

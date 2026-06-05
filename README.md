@@ -49,3 +49,34 @@ Requires Anki 2.1.55 or newer.
 - Large Good/Easy and all-deck new-limit batches are merged incrementally to
   stay inside Anki's undo-history window.
 - If an action fails, the add-on shows failure details, offers to open failed cards in the Browser, and writes details to `user_files/study-triage.log` inside the add-on folder.
+
+## Development
+
+Run repository checks with:
+
+```sh
+make test
+```
+
+Run the disposable Anki GUI smoke test with:
+
+```sh
+make test-gui-smoke
+```
+
+The GUI smoke test uses `anki-workbench` from the sibling
+`anki-addon-workbench` project. It launches Anki with a temporary base folder,
+installs this add-on plus the project-specific probe add-on, verifies the Tools
+and deck-cog menu actions through Qt, writes a JSON result, and quits. See
+`tests/gui_smoke/README.md` for the Docker/Xvfb variant that keeps GUI activity
+inside a virtual display.
+
+For exploratory agent-driven GUI work, use:
+
+```sh
+uv run --extra dev anki-workbench launch --xvfb --keep
+uv run --extra dev anki-workbench screenshot --out .tmp-gui-workbench/shot.png
+```
+
+The compatibility scripts in `scripts/` delegate to `anki-workbench` and
+`gui-workbench` for older commands.

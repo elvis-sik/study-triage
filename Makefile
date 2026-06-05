@@ -9,13 +9,15 @@ MYPY_FILES := $(shell git ls-files --cached --others --exclude-standard '*.py' '
 JS_FILES := $(shell git ls-files --cached --others --exclude-standard '*.js' '*.mjs' ':!:out/**' ':!:dist/**' ':!:node_modules/**')
 SHELL_FILES := $(shell git ls-files --cached --others --exclude-standard '*.sh')
 
-.PHONY: help lint lint-paths lint-python lint-js lint-shell type test check
+.PHONY: help lint lint-paths lint-python lint-js lint-shell type test test-gui-smoke dockerfile check
 
 help:
 	@printf "Available targets:\n"
 	@printf "  make lint   Run linters and source hygiene checks\n"
 	@printf "  make type   Run type checks where typed source exists\n"
 	@printf "  make test   Run unit tests and repository hygiene tests\n"
+	@printf "  make test-gui-smoke  Run disposable Anki GUI menu smoke checks\n"
+	@printf "  make dockerfile      Render the Anki GUI Dockerfile\n"
 	@printf "  make check  Run lint, type, and test\n"
 
 lint: lint-paths lint-python lint-js lint-shell
@@ -69,5 +71,11 @@ test:
 	@if [ -f package.json ] && node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.test ? 0 : 1)"; then \
 		npm test; \
 	fi
+
+test-gui-smoke:
+	@$(UV) run --extra dev anki-workbench smoke
+
+dockerfile:
+	@$(UV) run --extra dev anki-workbench dockerfile --out tests/gui_smoke/Dockerfile
 
 check: lint type test

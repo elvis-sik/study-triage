@@ -2,3 +2,5 @@ __pycache__/
 dist/
 user_files/
 .DS_Store
+.tmp-gui-smoke/
+.tmp-gui-workbench/

@@ -7,6 +7,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = [
+  "anki-addon-workbench>=0.1.0",
   "mypy>=1.13.0",
   "ruff>=0.6.0",
 ]
@@ -15,8 +16,34 @@ dev = [
 exclude-newer = "7 days"
 package = false
 
+[tool.uv.sources]
+anki-addon-workbench = { path = "../anki-addon-workbench", editable = true }
+gui-agent-workbench = { path = "../gui-agent-workbench", editable = true }
+
 [tool.uv.pip]
 exclude-newer = "7 days"
+
+[tool.anki-addon-workbench]
+project_name = "Study Triage"
+addon_package = "study_triage"
+source_root = "."
+include = ["__init__.py", "manifest.json", "README.md"]
+exclude = [
+  ".git",
+  "__pycache__",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".ruff_cache",
+  ".uv-cache",
+  "dist",
+  "tests",
+  "user_files",
+]
+probe_addon = "tests/gui_smoke/probe_addon"
+probe_package = "zz_study_triage_gui_probe"
+anki_version = "25.09"
+profile = "User 1"
+docker_image = "study-triage-anki-gui"
 
 [tool.ruff]
 line-length = 100
@@ -26,3 +53,4 @@ python_version = "3.10"
 ignore_missing_imports = true
 follow_imports = "skip"
 check_untyped_defs = false
+explicit_package_bases = true
