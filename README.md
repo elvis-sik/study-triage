@@ -20,7 +20,11 @@ Or click a deck's cog menu on the Decks screen and open:
 
 - `Study Triage`
 
-The cog-menu actions apply to that deck. Anki's deck search includes subdecks,
+The same deck menu is also available by right-clicking a deck name on the Decks
+screen. This is useful with deck-browser layout add-ons that hide Anki's cog
+icon.
+
+The deck-menu actions apply to that deck. Anki's deck search includes subdecks,
 so answering due cards from a parent deck includes due cards in its children.
 Filtered decks can use the Good/Easy actions; the new-card limit action is only
 available for regular decks.
@@ -39,7 +43,7 @@ Requires Anki 2.1.55 or newer.
 
 1. Copy the folder contents into an Anki add-on folder such as `StudyTriage`.
 2. Restart Anki.
-3. Run `Tools -> Study Triage` or use the deck cog menu whenever you need to triage a deck.
+3. Run `Tools -> Study Triage`, use the deck cog menu, or right-click a deck name whenever you need to triage a deck.
 
 ## Notes
 
@@ -67,7 +71,8 @@ make test-gui-smoke
 The GUI smoke test uses `anki-workbench` from the sibling
 `anki-addon-workbench` project. It launches Anki with a temporary base folder,
 installs this add-on plus the project-specific probe add-on, verifies the Tools
-and deck-cog menu actions through Qt, writes a JSON result, and quits. See
+and deck-cog menu actions through Qt, checks the deck-name context menu bridge,
+writes a JSON result, and quits. See
 `tests/gui_smoke/README.md` for the Docker/Xvfb variant that keeps GUI activity
 inside a virtual display.
 

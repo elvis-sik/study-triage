@@ -169,6 +169,55 @@ def _run_deck_menu_interaction(deck_id: int) -> dict[str, Any]:
     }
 
 
+def _run_deck_context_menu_interaction(deck_id: int) -> dict[str, Any]:
+    assert mw is not None
+    assert mw.col is not None
+
+    study_triage = importlib.import_module("study_triage")
+
+    script = study_triage._deck_context_menu_js()
+    if "contextmenu" not in script or study_triage.DECK_CONTEXT_MESSAGE_PREFIX not in script:
+        raise AssertionError("deck context-menu bridge script is missing expected markers")
+
+    context_menu = study_triage._build_deck_context_menu(deck_id)
+    if context_menu is None:
+        raise AssertionError("deck context menu builder returned no menu")
+
+    triage_menu = _find_qmenu(context_menu, MENU_LABEL)
+    context_menu_items = _action_snapshot(context_menu)
+    _assert_expected_actions(_action_snapshot(triage_menu))
+
+    deck_browser = getattr(mw, "deckBrowser", None)
+    if deck_browser is None:
+        raise AssertionError("main window does not expose deckBrowser")
+
+    calls: list[tuple[Any, int]] = []
+    original_show_context_menu = study_triage._show_deck_options_context_menu
+    study_triage._show_deck_options_context_menu = (
+        lambda context, bridged_deck_id: calls.append((context, bridged_deck_id))
+    )
+    try:
+        handled = study_triage._handle_deck_context_menu_message(
+            (False, None),
+            f"{study_triage.DECK_CONTEXT_MESSAGE_PREFIX}{deck_id}",
+            deck_browser,
+        )
+    finally:
+        study_triage._show_deck_options_context_menu = original_show_context_menu
+
+    if handled != (True, None):
+        raise AssertionError(f"deck context-menu bridge was not handled: {handled!r}")
+    if calls != [(deck_browser, deck_id)]:
+        raise AssertionError(f"deck context-menu bridge called unexpected target: {calls!r}")
+
+    return {
+        "bridge_handled": True,
+        "deck_id": deck_id,
+        "context_menu": context_menu_items,
+        "via": "webview JS-message bridge plus deck context submenu builder",
+    }
+
+
 def _run_smoke() -> dict[str, Any]:
     assert mw is not None
     assert mw.col is not None
@@ -201,6 +250,7 @@ def _run_smoke() -> dict[str, Any]:
         raise AssertionError("deck-specific zero-new action should be enabled")
 
     interaction = _run_deck_menu_interaction(deck_id)
+    context_interaction = _run_deck_context_menu_interaction(deck_id)
 
     return {
         "ok": True,
@@ -208,6 +258,7 @@ def _run_smoke() -> dict[str, Any]:
         "deck_menu": deck_items,
         "deck_id": deck_id,
         "interaction": interaction,
+        "context_interaction": context_interaction,
         "anki_version": getattr(mw, "appVersion", None),
     }
 

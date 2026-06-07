@@ -18,6 +18,7 @@ MENU_LABEL = "Study Triage"
 ZERO_NEW_LABEL = "Set Today's New Cards to 0"
 ANSWER_DUE_GOOD_LABEL = "Answer Due Cards as Good"
 ANSWER_DUE_EASY_LABEL = "Answer Due Cards as Easy"
+DECK_CONTEXT_MESSAGE_PREFIX = "study-triage-deck-context:"
 EASE_GOOD = 3
 EASE_EASY = 4
 ANKI_UNDO_ENTRY_LIMIT = 30
@@ -25,6 +26,7 @@ UNDO_MERGE_SAFETY_MARGIN = 5
 UNDO_MERGE_PREFERRED_INTERVAL = 20
 
 _tools_menu: Optional[Any] = None
+_active_deck_context_menu: Optional[Any] = None
 
 
 class _BulkAnswerResult:
@@ -59,7 +61,149 @@ def _setup_menu() -> None:
     _add_triage_actions(_tools_menu)
 
 
+def _add_deck_triage_submenu(menu, deck_id: int, *, with_separator: bool = False) -> Any:
+    if mw is None or mw.col is None:
+        return None
+
+    normalized_deck_id = _normalize_deck_id(deck_id)
+    if normalized_deck_id is None:
+        return None
+
+    deck = _get_deck(mw.col, normalized_deck_id)
+    if not isinstance(deck, dict):
+        return None
+
+    if with_separator:
+        menu.addSeparator()
+    submenu = menu.addMenu(MENU_LABEL)
+    _add_triage_actions(submenu, normalized_deck_id)
+    return submenu
+
+
 def _add_deck_options_menu_item(menu, deck_id: int) -> None:
+    _add_deck_triage_submenu(menu, deck_id, with_separator=True)
+
+
+def _build_deck_context_menu(deck_id: int) -> Any:
+    if mw is None:
+        return None
+
+    try:
+        from aqt.qt import QMenu
+    except Exception:
+        return None
+
+    menu = QMenu(mw)
+    if _add_deck_triage_submenu(menu, deck_id) is None:
+        return None
+    return menu
+
+
+def _show_study_triage_deck_context_menu(deck_id: int) -> None:
+    global _active_deck_context_menu
+
+    menu = _build_deck_context_menu(deck_id)
+    if menu is None:
+        return
+
+    _active_deck_context_menu = menu
+
+    def clear_active_menu() -> None:
+        global _active_deck_context_menu
+        if _active_deck_context_menu is menu:
+            _active_deck_context_menu = None
+
+    try:
+        menu.aboutToHide.connect(clear_active_menu)
+    except Exception:
+        pass
+
+    try:
+        from aqt.qt import QCursor
+    except Exception:
+        return
+
+    menu.popup(QCursor.pos())
+
+
+def _deck_context_menu_js() -> str:
+    return f"""
+<script>
+(function() {{
+    if (window.studyTriageDeckContextInstalled) {{
+        return;
+    }}
+    window.studyTriageDeckContextInstalled = true;
+
+    function deckIdFromTarget(target) {{
+        if (!target || !target.closest) {{
+            return null;
+        }}
+
+        var link = target.closest("a");
+        if (link) {{
+            var onclick = link.getAttribute("onclick") || "";
+            var match = onclick.match(/open:(\\d+)/);
+            if (match) {{
+                return match[1];
+            }}
+        }}
+
+        var deckCell = target.closest("td.decktd");
+        if (deckCell) {{
+            var row = deckCell.closest("tr[id]");
+            if (row && /^\\d+$/.test(row.id)) {{
+                return row.id;
+            }}
+        }}
+
+        return null;
+    }}
+
+    document.addEventListener("contextmenu", function(event) {{
+        var deckId = deckIdFromTarget(event.target);
+        if (!deckId || typeof pycmd !== "function") {{
+            return;
+        }}
+
+        event.preventDefault();
+        event.stopPropagation();
+        pycmd("{DECK_CONTEXT_MESSAGE_PREFIX}" + deckId);
+    }}, true);
+}})();
+</script>
+"""
+
+
+def _is_deck_browser_context(context: Any) -> bool:
+    if context is None:
+        return False
+
+    try:
+        from aqt.deckbrowser import DeckBrowser
+    except Exception:
+        return context.__class__.__name__ == "DeckBrowser"
+
+    return isinstance(context, DeckBrowser)
+
+
+def _inject_deck_context_menu_js(web_content: Any, context: Any) -> None:
+    if _is_deck_browser_context(context):
+        web_content.body += _deck_context_menu_js()
+
+
+def _parse_deck_context_menu_message(message: str) -> Optional[int]:
+    if not message.startswith(DECK_CONTEXT_MESSAGE_PREFIX):
+        return None
+
+    raw_deck_id = message[len(DECK_CONTEXT_MESSAGE_PREFIX) :]
+    if not raw_deck_id.isdigit():
+        return None
+
+    return int(raw_deck_id)
+
+
+def _show_deck_options_context_menu(context: Any, deck_id: int) -> None:
     if mw is None or mw.col is None:
         return
 
@@ -71,9 +215,36 @@ def _add_deck_options_menu_item(menu, deck_id: int) -> None:
     if not isinstance(deck, dict):
         return
 
-    menu.addSeparator()
-    submenu = menu.addMenu(MENU_LABEL)
-    _add_triage_actions(submenu, normalized_deck_id)
+    show_options = getattr(context, "_showOptions", None)
+    if callable(show_options):
+        show_options(str(normalized_deck_id))
+        return
+
+    _show_study_triage_deck_context_menu(normalized_deck_id)
+
+
+def _message_already_handled(handled: Any) -> bool:
+    if isinstance(handled, tuple):
+        return bool(handled[0])
+    return bool(handled)
+
+
+def _handled_js_message_result(handled: Any) -> Any:
+    if isinstance(handled, tuple):
+        return True, None
+    return True
+
+
+def _handle_deck_context_menu_message(handled: Any, message: str, context: Any) -> Any:
+    if _message_already_handled(handled) or not _is_deck_browser_context(context):
+        return handled
+
+    deck_id = _parse_deck_context_menu_message(message)
+    if deck_id is None:
+        return handled
+
+    _show_deck_options_context_menu(context, deck_id)
+    return _handled_js_message_result(handled)
 
 
 def _add_triage_actions(menu, deck_id: Optional[int] = None) -> None:
@@ -1838,3 +2009,7 @@ if gui_hooks is not None:
     gui_hooks.main_window_did_init.append(_setup_menu)
     if hasattr(gui_hooks, "deck_browser_will_show_options_menu"):
         gui_hooks.deck_browser_will_show_options_menu.append(_add_deck_options_menu_item)
+    if hasattr(gui_hooks, "webview_will_set_content"):
+        gui_hooks.webview_will_set_content.append(_inject_deck_context_menu_js)
+    if hasattr(gui_hooks, "webview_did_receive_js_message"):
+        gui_hooks.webview_did_receive_js_message.append(_handle_deck_context_menu_message)

@@ -12,8 +12,10 @@ runs.
 The probe add-on waits for Anki's main window initialization hook, inspects the
 real Qt `Tools` menu, synthesizes Anki's deck-cog options menu hook, then opens
 the Study Triage deck submenu and clicks the deck-specific zero-new action with
-`QTest.mouseClick`. The JSON result includes the clicked action, signal count,
-and before/after deck limit assertion before Anki quits.
+`QTest.mouseClick`. It also exercises the right-click deck-name JavaScript
+bridge and context menu builder. The JSON result includes the clicked action,
+signal count, bridge assertion, and before/after deck limit assertion before
+Anki quits.
 
 ## Host Run
 

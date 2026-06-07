@@ -7,12 +7,12 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-05-29T02:19:44.908567Z"
+exclude-newer = "2026-05-31T22:46:26.809073Z"
 exclude-newer-span = "P7D"
 
 [[package]]
 name = "anki-addon-workbench"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "../anki-addon-workbench" }
 dependencies = [
     { name = "tomli", marker = "python_full_version < '3.11'" },
@@ -21,11 +21,14 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13.0" },
+    { name = "pillow", marker = "extra == 'gui'", specifier = ">=10.0" },
+    { name = "pyautogui", marker = "extra == 'gui'", specifier = ">=0.9.54" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.0" },
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0" },
     { name = "tomli", marker = "extra == 'dev'", specifier = ">=2.0" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["gui", "dev"]
 
 [[package]]
 name = "ast-serialize"
@@ -269,7 +272,7 @@ wheels = [
 
 [[package]]
 name = "study-triage"
-version = "0.3.9"
+version = "0.3.10"
 source = { virtual = "." }
 
 [package.optional-dependencies]
