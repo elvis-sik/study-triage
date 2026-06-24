@@ -4,10 +4,9 @@ This directory validates the add-on in a disposable Anki GUI process without
 touching the user's real Anki base folder or collection.
 
 The reusable launch, disposable profile, add-on copy, Docker/Xvfb, screenshot,
-and input tooling lives in the sibling `anki-addon-workbench` and
-`gui-agent-workbench` projects. This directory keeps only the Study
-Triage-specific probe add-on and the rendered Dockerfile used for local smoke
-runs.
+and input tooling lives in the PyPI `anki-addon-workbench[gui]` package. This
+directory keeps only the Study Triage-specific probe add-on and the checked-in
+Dockerfile used for local smoke runs.
 
 The probe add-on waits for Anki's main window initialization hook, inspects the
 real Qt `Tools` menu, synthesizes Anki's deck-cog options menu hook, then opens
@@ -41,11 +40,11 @@ docker build -f anki-zero-today-new/tests/gui_smoke/Dockerfile -t study-triage-a
 docker run --rm -v "$PWD":/workspace -w /workspace/anki-zero-today-new study-triage-anki-gui
 ```
 
-The Docker image uses Anki's Linux launcher at build time, then runs the
-installed Anki entrypoint under Xvfb. GUI activity stays inside a virtual display
-and does not use the host mouse or keyboard. The workspace mount makes local
-edits in `anki-zero-today-new`, `anki-addon-workbench`, and
-`gui-agent-workbench` visible inside the container.
+The Docker image uses Anki's Linux launcher at build time, installs
+`anki-addon-workbench[gui]` from PyPI, then runs the installed Anki entrypoint
+under Xvfb. GUI activity stays inside a virtual display and does not use the
+host mouse or keyboard. The workspace mount makes local edits in
+`anki-zero-today-new` visible inside the container.
 
 To keep logs and a screenshot from a Docker run:
 
@@ -86,21 +85,21 @@ docker run -d --name study-triage-workbench -v "$PWD":/workspace -w /workspace/a
     --artifact-dir /workspace/anki-zero-today-new/.tmp-gui-workbench
 ```
 
-With that container running, use the Anki-managed Python to drive the display:
+With that container running, use the system Python to drive the display:
 
 ```sh
 docker exec study-triage-workbench \
-  /root/.local/share/AnkiProgramFiles/.venv/bin/python \
+  python3 \
   -m anki_addon_workbench screenshot \
     --out /workspace/anki-zero-today-new/.tmp-gui-workbench/shot-001.png \
     --meta /workspace/anki-zero-today-new/.tmp-gui-workbench/shot-001.json
 
 docker exec study-triage-workbench \
-  /root/.local/share/AnkiProgramFiles/.venv/bin/python \
+  python3 \
   -m anki_addon_workbench move 558 166
 
 docker exec study-triage-workbench \
-  /root/.local/share/AnkiProgramFiles/.venv/bin/python \
+  python3 \
   -m anki_addon_workbench click
 ```
 

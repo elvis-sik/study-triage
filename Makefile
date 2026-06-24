@@ -17,7 +17,7 @@ help:
 	@printf "  make type   Run type checks where typed source exists\n"
 	@printf "  make test   Run unit tests and repository hygiene tests\n"
 	@printf "  make test-gui-smoke  Run disposable Anki GUI menu smoke checks\n"
-	@printf "  make dockerfile      Render the Anki GUI Dockerfile\n"
+	@printf "  make dockerfile      Explain the checked-in Anki GUI Dockerfile\n"
 	@printf "  make check  Run lint, type, and test\n"
 
 lint: lint-paths lint-python lint-js lint-shell
@@ -76,6 +76,7 @@ test-gui-smoke:
 	@$(UV) run --extra dev anki-workbench smoke
 
 dockerfile:
-	@$(UV) run --extra dev anki-workbench dockerfile --out tests/gui_smoke/Dockerfile
+	@printf "tests/gui_smoke/Dockerfile is maintained in this repo for now.\n"
+	@printf "anki-addon-workbench 0.2.0's renderer still assumes a sibling source checkout.\n"
 
 check: lint type test

@@ -7,19 +7,15 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = [
-  "anki-addon-workbench>=0.1.0",
-  "gui-agent-workbench>=0.1.0",
+  "anki-addon-workbench[gui]>=0.2.0",
   "mypy>=1.13.0",
   "ruff>=0.6.0",
 ]
 
 [tool.uv]
 exclude-newer = "7 days"
+exclude-newer-package = { anki-addon-workbench = "2026-06-25" }
 package = false
-
-[tool.uv.sources]
-anki-addon-workbench = { path = "../anki-addon-workbench", editable = true }
-gui-agent-workbench = { path = "../gui-agent-workbench", editable = true }
 
 [tool.uv.pip]
 exclude-newer = "7 days"

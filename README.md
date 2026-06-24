@@ -68,11 +68,11 @@ Run the disposable Anki GUI smoke test with:
 make test-gui-smoke
 ```
 
-The GUI smoke test uses `anki-workbench` from the sibling
-`anki-addon-workbench` project. It launches Anki with a temporary base folder,
-installs this add-on plus the project-specific probe add-on, verifies the Tools
-and deck-cog menu actions through Qt, checks the deck-name context menu bridge,
-writes a JSON result, and quits. See
+The GUI smoke test uses `anki-workbench` from the PyPI
+`anki-addon-workbench[gui]` package. It launches Anki with a temporary base
+folder, installs this add-on plus the project-specific probe add-on, verifies
+the Tools and deck-cog menu actions through Qt, checks the deck-name context
+menu bridge, writes a JSON result, and quits. See
 `tests/gui_smoke/README.md` for the Docker/Xvfb variant that keeps GUI activity
 inside a virtual display.
 
@@ -83,5 +83,5 @@ uv run --extra dev anki-workbench launch --xvfb --keep
 uv run --extra dev anki-workbench screenshot --out .tmp-gui-workbench/shot.png
 ```
 
-The compatibility scripts in `scripts/` delegate to `anki-workbench` and
-`gui-workbench` for older commands.
+The compatibility scripts in `scripts/` delegate to the installed
+`anki-workbench` package for older commands.
