@@ -20,6 +20,30 @@ package = false
 [tool.uv.pip]
 exclude-newer = "7 days"
 
+[tool.anki-addon-release]
+source_dir = "."
+manifest = "manifest.json"
+artifact_dir = "dist"
+artifact_name = "study-triage.ankiaddon"
+include = ["__init__.py", "manifest.json", "README.md"]
+exclude = [
+  ".git",
+  "__pycache__",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".ruff_cache",
+  ".uv-cache",
+  ".venv",
+  ".anki-addon-release",
+  "dist",
+  "tests",
+  "user_files",
+]
+
+[tool.anki-addon-release.ankiweb]
+title = "Study Triage"
+description_file = "README.md"
+
 [tool.anki-addon-workbench]
 project_name = "Study Triage"
 addon_package = "study_triage"
