@@ -9,7 +9,7 @@ MYPY_FILES := $(shell git ls-files --cached --others --exclude-standard '*.py' '
 JS_FILES := $(shell git ls-files --cached --others --exclude-standard '*.js' '*.mjs' ':!:out/**' ':!:dist/**' ':!:node_modules/**')
 SHELL_FILES := $(shell git ls-files --cached --others --exclude-standard '*.sh')
 
-.PHONY: help lint lint-paths lint-python lint-js lint-shell type test test-gui-smoke dockerfile check
+.PHONY: help lint lint-paths lint-python lint-js lint-shell type test test-gui-smoke dockerfile release release-login release-publish check
 
 help:
 	@printf "Available targets:\n"
@@ -18,6 +18,9 @@ help:
 	@printf "  make test   Run unit tests and repository hygiene tests\n"
 	@printf "  make test-gui-smoke  Run disposable Anki GUI menu smoke checks\n"
 	@printf "  make dockerfile      Explain the checked-in Anki GUI Dockerfile\n"
+	@printf "  make release         Resolve .env op refs, log in, and prepare AnkiWeb form\n"
+	@printf "  make release-login   Resolve .env op refs and log in to AnkiWeb\n"
+	@printf "  make release-publish Resolve .env op refs and prepare AnkiWeb form\n"
 	@printf "  make check  Run lint, type, and test\n"
 
 lint: lint-paths lint-python lint-js lint-shell
@@ -78,5 +81,14 @@ test-gui-smoke:
 dockerfile:
 	@printf "tests/gui_smoke/Dockerfile is maintained in this repo for now.\n"
 	@printf "anki-addon-workbench 0.2.0's renderer still assumes a sibling source checkout.\n"
+
+release:
+	@$(PYTHON) scripts/release_with_op.py release
+
+release-login:
+	@$(PYTHON) scripts/release_with_op.py login
+
+release-publish:
+	@$(PYTHON) scripts/release_with_op.py publish
 
 check: lint type test

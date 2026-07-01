@@ -85,3 +85,29 @@ uv run --extra dev anki-workbench screenshot --out .tmp-gui-workbench/shot.png
 
 The compatibility scripts in `scripts/` delegate to the installed
 `anki-workbench` package for older commands.
+
+## Release
+
+The release path dogfoods the sibling `anki-addon-release` framework. Put
+1Password item references in the git-ignored `.env` file:
+
+```sh
+cp .env.example .env
+```
+
+Then run:
+
+```sh
+make release
+```
+
+That resolves the references with `op read`, passes the resolved credentials
+only to the child release process, logs in to AnkiWeb, builds the `.ankiaddon`,
+fills the AnkiWeb form, and stops before the final save button. The prepared
+browser stays open until you press Enter in the terminal.
+
+Use `make release-login` to refresh the browser-profile login, or
+`make release-publish` to refill the publish form after login is already valid.
+If AnkiWeb says the dedicated account is too new, wait until AnkiWeb permits
+sharing from that account or switch `.env` to an older dedicated publishing
+account.
