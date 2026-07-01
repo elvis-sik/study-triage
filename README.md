@@ -108,6 +108,11 @@ browser stays open until you press Enter in the terminal.
 
 Use `make release-login` to refresh the browser-profile login, or
 `make release-publish` to refill the publish form after login is already valid.
-If AnkiWeb says the dedicated account is too new, wait until AnkiWeb permits
-sharing from that account or switch `.env` to an older dedicated publishing
-account.
+If AnkiWeb says the dedicated account is too new, it is hitting AnkiWeb's
+[new-account sharing guard](https://ankiweb.net/shared/too-new). AnkiWeb does
+not publish an exact wait period there, so wait until sharing is permitted or
+switch `.env` to an older dedicated publishing account. Keep that account
+active too: AnkiWeb's
+[account-removal article](https://anki.tenderapp.com/kb/anki-ecosystem/ankiweb-account-removal)
+says account data may be deleted after 6 months without account access or sync,
+even though shared add-ons are not subject to the usual data expiry.
