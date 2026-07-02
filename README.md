@@ -1,6 +1,12 @@
 # Study Triage
 
-An Anki add-on that adds quick triage actions for days when you need to reduce today's study load.
+[![AnkiWeb add-on 1850611434](https://img.shields.io/badge/AnkiWeb-1850611434-2f80ed)](https://ankiweb.net/shared/info/1850611434)
+[![Source on GitHub](https://img.shields.io/badge/source-GitHub-24292f)](https://github.com/elvis-sik/anki-zero-today-new)
+![Anki 2.1.55+](https://img.shields.io/badge/Anki-%3E%3D2.1.55-4caf50)
+
+Study Triage is an Anki add-on that adds quick triage actions for days when you need to reduce today's study load.
+
+![Study Triage deck browser screenshot](docs/study-triage-workbench.png)
 
 ## What it does
 
@@ -40,6 +46,17 @@ with progress, and try to group the change into a single Anki undo step.
 ## Install
 
 Requires Anki 2.1.55 or newer.
+
+### From AnkiWeb
+
+1. In Anki, open `Tools -> Add-ons -> Get Add-ons...`.
+2. Enter add-on code `1850611434`.
+3. Restart Anki.
+4. Run `Tools -> Study Triage`, use the deck cog menu, or right-click a deck name whenever you need to triage a deck.
+
+AnkiWeb page: <https://ankiweb.net/shared/info/1850611434>
+
+### From Source
 
 1. Copy the folder contents into an Anki add-on folder such as `StudyTriage`.
 2. Restart Anki.
@@ -108,10 +125,12 @@ browser stays open until you press Enter in the terminal.
 
 Use `make release-login` to refresh the browser-profile login, or
 `make release-publish` to refill the publish form after login is already valid.
+The dedicated publishing-account pattern is documented in
+[`anki-addon-release`](https://github.com/elvis-sik/anki-addon-release#separate-publishing-account).
 If AnkiWeb says the dedicated account is too new, it is hitting AnkiWeb's
 [new-account sharing guard](https://ankiweb.net/shared/too-new). AnkiWeb does
-not publish an exact wait period there, so wait until sharing is permitted or
-switch `.env` to an older dedicated publishing account. Keep that account
+not publish an exact wait period there, so create the account before you need it
+or switch `.env` to an older eligible publishing account. Keep that account
 active too: AnkiWeb's
 [account-removal article](https://anki.tenderapp.com/kb/anki-ecosystem/ankiweb-account-removal)
 says account data may be deleted after 6 months without account access or sync,
