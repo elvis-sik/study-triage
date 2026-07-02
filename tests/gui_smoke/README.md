@@ -36,21 +36,21 @@ uv run --extra dev anki-workbench smoke --screenshot /tmp/study-triage-gui.png
 Start Docker Desktop, then run from the `anki-studying` workspace root:
 
 ```sh
-docker build -f anki-zero-today-new/tests/gui_smoke/Dockerfile -t study-triage-anki-gui anki-zero-today-new
-docker run --rm -v "$PWD":/workspace -w /workspace/anki-zero-today-new study-triage-anki-gui
+docker build -f study-triage/tests/gui_smoke/Dockerfile -t study-triage-anki-gui study-triage
+docker run --rm -v "$PWD":/workspace -w /workspace/study-triage study-triage-anki-gui
 ```
 
 The Docker image uses Anki's Linux launcher at build time, installs
 `anki-addon-workbench[gui]` from PyPI, then runs the installed Anki entrypoint
 under Xvfb. GUI activity stays inside a virtual display and does not use the
 host mouse or keyboard. The workspace mount makes local edits in
-`anki-zero-today-new` visible inside the container.
+`study-triage` visible inside the container.
 
 To keep logs and a screenshot from a Docker run:
 
 ```sh
-mkdir -p anki-zero-today-new/.tmp-gui-smoke
-docker run --rm -v "$PWD":/workspace -w /workspace/anki-zero-today-new study-triage-anki-gui sh -lc 'Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp & xvfb_pid=$!; export DISPLAY=:99; python3 -m anki_addon_workbench smoke --anki-bin /root/.local/share/AnkiProgramFiles/.venv/bin/anki --base /workspace/anki-zero-today-new/.tmp-gui-smoke/base --keep --screenshot /workspace/anki-zero-today-new/.tmp-gui-smoke/gui-smoke.png; status=$?; kill "$xvfb_pid" 2>/dev/null || true; exit "$status"'
+mkdir -p study-triage/.tmp-gui-smoke
+docker run --rm -v "$PWD":/workspace -w /workspace/study-triage study-triage-anki-gui sh -lc 'Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp & xvfb_pid=$!; export DISPLAY=:99; python3 -m anki_addon_workbench smoke --anki-bin /root/.local/share/AnkiProgramFiles/.venv/bin/anki --base /workspace/study-triage/.tmp-gui-smoke/base --keep --screenshot /workspace/study-triage/.tmp-gui-smoke/gui-smoke.png; status=$?; kill "$xvfb_pid" 2>/dev/null || true; exit "$status"'
 ```
 
 ## Agent GUI Workbench
@@ -64,11 +64,11 @@ display.
 One-shot launch plus cursor-marked screenshot:
 
 ```sh
-docker run --rm -v "$PWD":/workspace -w /workspace/anki-zero-today-new study-triage-anki-gui \
+docker run --rm -v "$PWD":/workspace -w /workspace/study-triage study-triage-anki-gui \
   python3 -m anki_addon_workbench launch \
     --xvfb \
-    --base /workspace/anki-zero-today-new/.tmp-gui-workbench/base \
-    --artifact-dir /workspace/anki-zero-today-new/.tmp-gui-workbench \
+    --base /workspace/study-triage/.tmp-gui-workbench/base \
+    --artifact-dir /workspace/study-triage/.tmp-gui-workbench \
     --pointer 558,166 \
     --keep
 ```
@@ -77,12 +77,12 @@ Detached agent workbench:
 
 ```sh
 docker rm -f study-triage-workbench 2>/dev/null || true
-docker run -d --name study-triage-workbench -v "$PWD":/workspace -w /workspace/anki-zero-today-new study-triage-anki-gui \
+docker run -d --name study-triage-workbench -v "$PWD":/workspace -w /workspace/study-triage study-triage-anki-gui \
   python3 -m anki_addon_workbench launch \
     --xvfb \
     --hold \
-    --base /workspace/anki-zero-today-new/.tmp-gui-workbench/base \
-    --artifact-dir /workspace/anki-zero-today-new/.tmp-gui-workbench
+    --base /workspace/study-triage/.tmp-gui-workbench/base \
+    --artifact-dir /workspace/study-triage/.tmp-gui-workbench
 ```
 
 With that container running, use the system Python to drive the display:
@@ -91,8 +91,8 @@ With that container running, use the system Python to drive the display:
 docker exec study-triage-workbench \
   python3 \
   -m anki_addon_workbench screenshot \
-    --out /workspace/anki-zero-today-new/.tmp-gui-workbench/shot-001.png \
-    --meta /workspace/anki-zero-today-new/.tmp-gui-workbench/shot-001.json
+    --out /workspace/study-triage/.tmp-gui-workbench/shot-001.png \
+    --meta /workspace/study-triage/.tmp-gui-workbench/shot-001.json
 
 docker exec study-triage-workbench \
   python3 \

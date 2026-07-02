@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from aqt import gui_hooks, mw
-from aqt.qt import QApplication, QMenu, QPoint, QTimer, Qt
+from aqt.qt import QApplication, QMenu, QPoint, QRect, QTimer, Qt, QToolTip
 
 try:
     from aqt.qt import QTest
@@ -282,10 +282,66 @@ def _save_screenshot() -> str | None:
 
     screenshot_path = Path(path)
     screenshot_path.parent.mkdir(parents=True, exist_ok=True)
-    pixmap = mw.grab()
+    pixmap = _grab_menu_screenshot()
     if not pixmap.save(str(screenshot_path), "PNG"):
         raise RuntimeError(f"failed to save screenshot to {screenshot_path}")
     return str(screenshot_path)
+
+
+def _grab_menu_screenshot():
+    assert mw is not None
+    QToolTip.hideText()
+    _hide_transient_widgets()
+    _process_events(100)
+    deck_id = _ensure_smoke_deck_id()
+
+    deck_menu = QMenu(mw)
+    gui_hooks.deck_browser_will_show_options_menu(deck_menu, deck_id)
+    triage_menu = _find_qmenu(deck_menu, MENU_LABEL)
+    triage_action = _find_qaction(deck_menu, MENU_LABEL)
+
+    deck_menu.adjustSize()
+    anchor = mw.mapToGlobal(QPoint(520, 150))
+    deck_menu.popup(anchor)
+    _process_events(250)
+
+    triage_rect = deck_menu.actionGeometry(triage_action)
+    deck_menu.setActiveAction(triage_action)
+    QTest.mouseMove(deck_menu, triage_rect.center())
+    _process_events(250)
+
+    triage_menu.adjustSize()
+    triage_menu.popup(deck_menu.mapToGlobal(triage_rect.topRight()))
+    _process_events(250)
+
+    try:
+        screen = mw.screen() or QApplication.primaryScreen()
+        if screen is None:
+            return mw.grab()
+        bounds = _expanded_bounds(mw.frameGeometry(), deck_menu.frameGeometry(), triage_menu.frameGeometry())
+        return screen.grabWindow(0, bounds.x(), bounds.y(), bounds.width(), bounds.height())
+    finally:
+        triage_menu.hide()
+        deck_menu.hide()
+        _process_events(50)
+
+
+def _expanded_bounds(*rects: QRect) -> QRect:
+    bounds = QRect(rects[0])
+    for rect in rects[1:]:
+        bounds = bounds.united(rect)
+    return bounds.adjusted(-24, -24, 24, 24)
+
+
+def _hide_transient_widgets() -> None:
+    app = QApplication.instance()
+    if app is None:
+        return
+    for widget in app.topLevelWidgets():
+        if widget is mw or isinstance(widget, QMenu):
+            continue
+        if widget.isVisible():
+            widget.hide()
 
 
 def _finish() -> None:

@@ -1,7 +1,7 @@
 # Study Triage
 
 [![AnkiWeb add-on 1850611434](https://img.shields.io/badge/AnkiWeb-1850611434-2f80ed)](https://ankiweb.net/shared/info/1850611434)
-[![Source on GitHub](https://img.shields.io/badge/source-GitHub-24292f)](https://github.com/elvis-sik/anki-zero-today-new)
+[![Source on GitHub](https://img.shields.io/badge/source-GitHub-24292f)](https://github.com/elvis-sik/study-triage)
 ![Anki 2.1.55+](https://img.shields.io/badge/Anki-%3E%3D2.1.55-4caf50)
 
 Study Triage is an Anki add-on that adds quick triage actions for days when you need to reduce today's study load.

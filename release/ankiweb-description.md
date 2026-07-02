@@ -19,4 +19,4 @@ Notes:
 
 Requires Anki 2.1.55 or newer.
 
-Source, screenshot, and issue tracker: github.com/elvis-sik/anki-zero-today-new
+Source, screenshot, and issue tracker: github.com/elvis-sik/study-triage
