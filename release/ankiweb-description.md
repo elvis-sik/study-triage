@@ -1,7 +1,5 @@
 Study Triage adds quick triage actions for days when you need to reduce today's Anki workload.
 
-![Study Triage deck browser screenshot](https://raw.githubusercontent.com/elvis-sik/anki-zero-today-new/main/docs/study-triage-workbench.png)
-
 Use it when you want to keep reviews moving but avoid adding more new cards, or when you need to quickly answer a batch of due cards.
 
 Actions:
@@ -21,4 +19,4 @@ Notes:
 
 Requires Anki 2.1.55 or newer.
 
-Source and issue tracker: https://github.com/elvis-sik/anki-zero-today-new
+Source, screenshot, and issue tracker: github.com/elvis-sik/anki-zero-today-new
