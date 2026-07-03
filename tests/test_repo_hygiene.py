@@ -63,7 +63,8 @@ def git_files() -> list[Path]:
         text=True,
         capture_output=True,
     )
-    return [Path(line) for line in result.stdout.splitlines() if line]
+    paths = [Path(line) for line in result.stdout.splitlines() if line]
+    return [path for path in paths if (ROOT / path).exists()]
 
 
 def is_skipped(path: Path) -> bool:

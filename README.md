@@ -106,7 +106,8 @@ The compatibility scripts in `scripts/` delegate to the installed
 ## Release
 
 The release path dogfoods the sibling `anki-addon-release` framework. Put
-1Password item references in the git-ignored `.env` file:
+1Password item references under the normal environment variable names in the
+git-ignored `.env` file:
 
 ```sh
 cp .env.example .env
@@ -118,10 +119,11 @@ Then run:
 make release
 ```
 
-That resolves the references with `op read`, passes the resolved credentials
-only to the child release process, logs in to AnkiWeb, builds the `.ankiaddon`,
-fills the AnkiWeb form, and stops before the final save button. The prepared
-browser stays open until you press Enter in the terminal.
+The release targets run the framework through `op run --env-file=.env -- ...`,
+so 1Password resolves any `op://` references only for the child release
+process. The command logs in to AnkiWeb, builds the `.ankiaddon`, fills the
+AnkiWeb form, and stops before the final save button. The prepared browser
+stays open until you press Enter in the terminal.
 
 Use `make release-login` to refresh the browser-profile login, or
 `make release-publish` to refill the publish form after login is already valid.

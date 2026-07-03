@@ -21,4 +21,4 @@ Requires Anki 2.1.55 or newer.
 
 <img src="https://raw.githubusercontent.com/elvis-sik/study-triage/main/docs/study-triage-workbench.png" alt="Study Triage deck menu screenshot">
 
-Source and issue tracker: github.com/elvis-sik/study-triage
+Source and issue tracker: [https://github.com/elvis-sik/study-triage](https://github.com/elvis-sik/study-triage)

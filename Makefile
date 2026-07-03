@@ -3,11 +3,16 @@ SHELL := /bin/bash
 
 PYTHON ?= python3
 UV ?= uv
+RELEASE_PROJECT ?= ../anki-addon-release
+RELEASE_ENV_FILE ?= .env
+RELEASE_DIAGNOSTICS_DIR ?= .anki-addon-release/diagnostics
+ANKI_ADDON_RELEASE = op run --env-file=$(RELEASE_ENV_FILE) -- $(UV) run --project $(RELEASE_PROJECT) --extra browser anki-addon-release --project .
+ANKI_ADDON_RELEASE_BROWSER_ARGS = --diagnostics-dir $(RELEASE_DIAGNOSTICS_DIR)
 
-PY_FILES := $(shell git ls-files --cached --others --exclude-standard '*.py' ':!:out/**' ':!:dist/**' ':!:node_modules/**' ':!:.venv/**' ':!:input/**' ':!:media/**' ':!:backups/**' ':!:templates/**' ':!:drafts/**' ':!:_vendor/**')
-MYPY_FILES := $(shell git ls-files --cached --others --exclude-standard '*.py' ':!:tests/**' ':!:out/**' ':!:dist/**' ':!:node_modules/**' ':!:.venv/**' ':!:input/**' ':!:media/**' ':!:backups/**' ':!:templates/**' ':!:drafts/**' ':!:_vendor/**')
-JS_FILES := $(shell git ls-files --cached --others --exclude-standard '*.js' '*.mjs' ':!:out/**' ':!:dist/**' ':!:node_modules/**')
-SHELL_FILES := $(shell git ls-files --cached --others --exclude-standard '*.sh')
+PY_FILES := $(wildcard $(shell git ls-files --cached --others --exclude-standard '*.py' ':!:out/**' ':!:dist/**' ':!:node_modules/**' ':!:.venv/**' ':!:input/**' ':!:media/**' ':!:backups/**' ':!:templates/**' ':!:drafts/**' ':!:_vendor/**'))
+MYPY_FILES := $(wildcard $(shell git ls-files --cached --others --exclude-standard '*.py' ':!:tests/**' ':!:out/**' ':!:dist/**' ':!:node_modules/**' ':!:.venv/**' ':!:input/**' ':!:media/**' ':!:backups/**' ':!:templates/**' ':!:drafts/**' ':!:_vendor/**'))
+JS_FILES := $(wildcard $(shell git ls-files --cached --others --exclude-standard '*.js' '*.mjs' ':!:out/**' ':!:dist/**' ':!:node_modules/**'))
+SHELL_FILES := $(wildcard $(shell git ls-files --cached --others --exclude-standard '*.sh'))
 
 .PHONY: help lint lint-paths lint-python lint-js lint-shell type test test-gui-smoke dockerfile release release-login release-publish check
 
@@ -18,9 +23,9 @@ help:
 	@printf "  make test   Run unit tests and repository hygiene tests\n"
 	@printf "  make test-gui-smoke  Run disposable Anki GUI menu smoke checks\n"
 	@printf "  make dockerfile      Explain the checked-in Anki GUI Dockerfile\n"
-	@printf "  make release         Resolve .env op refs, log in, and prepare AnkiWeb form\n"
-	@printf "  make release-login   Resolve .env op refs and log in to AnkiWeb\n"
-	@printf "  make release-publish Resolve .env op refs and prepare AnkiWeb form\n"
+	@printf "  make release         Run release via op run, log in, and prepare AnkiWeb form\n"
+	@printf "  make release-login   Run login via op run\n"
+	@printf "  make release-publish Run publish via op run\n"
 	@printf "  make check  Run lint, type, and test\n"
 
 lint: lint-paths lint-python lint-js lint-shell
@@ -83,12 +88,13 @@ dockerfile:
 	@printf "anki-addon-workbench 0.2.0's renderer still assumes a sibling source checkout.\n"
 
 release:
-	@$(PYTHON) scripts/release_with_op.py release
+	@$(ANKI_ADDON_RELEASE) login --submit-login $(ANKI_ADDON_RELEASE_BROWSER_ARGS)
+	@$(ANKI_ADDON_RELEASE) publish $(ANKI_ADDON_RELEASE_BROWSER_ARGS)
 
 release-login:
-	@$(PYTHON) scripts/release_with_op.py login
+	@$(ANKI_ADDON_RELEASE) login --submit-login $(ANKI_ADDON_RELEASE_BROWSER_ARGS)
 
 release-publish:
-	@$(PYTHON) scripts/release_with_op.py publish
+	@$(ANKI_ADDON_RELEASE) publish $(ANKI_ADDON_RELEASE_BROWSER_ARGS)
 
 check: lint type test

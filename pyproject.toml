@@ -42,7 +42,7 @@ exclude = [
 
 [tool.anki-addon-release.ankiweb]
 addon_id = "1850611434"
-title = "Study Triage"
+title = "Study Triage: 0 New Today & Auto-Accept Cards"
 support_url = "https://github.com/elvis-sik/study-triage"
 description_file = "release/ankiweb-description.md"
 login_email_env = "ANKIWEB_EMAIL"
