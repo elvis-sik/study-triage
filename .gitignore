@@ -2,6 +2,7 @@ __pycache__/
 .env
 dist/
 user_files/
+meta.json
 .DS_Store
 .tmp-gui-smoke/
 .tmp-gui-workbench/
