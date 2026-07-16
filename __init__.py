@@ -1729,12 +1729,6 @@ def _normalize_deck_id(deck_id: Optional[int]) -> Optional[int]:
 def _set_today_new_limit(col, deck_id: int, limit: int) -> bool:
     limit = int(limit)
 
-    if _set_today_new_limit_via_deck_configs(col, deck_id, limit):
-        return True
-
-    if _set_today_new_limit_on_deck(col, deck_id, limit):
-        return True
-
     for obj in (getattr(col, "decks", None), getattr(col, "sched", None)):
         if obj is None or not hasattr(obj, "set_today_limit"):
             continue
@@ -1752,95 +1746,10 @@ def _set_today_new_limit(col, deck_id: int, limit: int) -> bool:
         except Exception:
             pass
 
-    if _set_today_new_limit_with_scheduler(col, deck_id, limit):
+    if _set_today_new_limit_on_deck(col, deck_id, limit):
         return True
 
     return False
-
-
-def _set_today_new_limit_via_deck_configs(col, deck_id: int, limit: int) -> bool:
-    decks = getattr(col, "decks", None)
-    if decks is None:
-        return False
-    if not hasattr(decks, "get_deck_configs_for_update") or not hasattr(decks, "update_deck_configs"):
-        return False
-
-    try:
-        from anki.decks import UpdateDeckConfigs
-    except Exception:
-        return False
-
-    try:
-        state = decks.get_deck_configs_for_update(deck_id)
-    except Exception:
-        return False
-
-    current_deck = getattr(state, "current_deck", None)
-    if current_deck is None:
-        return False
-
-    selected_config = None
-    current_config_id = getattr(current_deck, "config_id", None)
-    for entry in getattr(state, "all_config", []):
-        config = getattr(entry, "config", None)
-        if config is not None and getattr(config, "id", None) == current_config_id:
-            selected_config = config
-            break
-    if selected_config is None:
-        return False
-
-    try:
-        req = UpdateDeckConfigs()
-        req.target_deck_id = int(deck_id)
-        req.mode = 0
-        req.card_state_customizer = getattr(state, "card_state_customizer", "")
-        req.new_cards_ignore_review_limit = bool(
-            getattr(state, "new_cards_ignore_review_limit", False)
-        )
-        req.apply_all_parent_limits = bool(getattr(state, "apply_all_parent_limits", False))
-        req.fsrs = bool(getattr(state, "fsrs", False))
-        req.fsrs_health_check = bool(getattr(state, "fsrs_health_check", False))
-        req.configs.add().CopyFrom(selected_config)
-        req.limits.CopyFrom(current_deck.limits)
-        # Anki retains the last Today-only value after it expires, and exposes
-        # that stale value alongside an inactive flag.  Its update endpoint
-        # re-dates every optional value present in the request to today, without
-        # consulting the active flag.  Do not accidentally reactivate an old
-        # review limit while changing the unrelated new-card limit.
-        if not bool(getattr(current_deck.limits, "review_today_active", False)):
-            req.limits.ClearField("review_today")
-        req.limits.new_today = int(limit)
-        decks.update_deck_configs(req)
-    except Exception:
-        return False
-
-    return _deck_limit_matches(col, deck_id, limit)
-
-
-def _set_today_new_limit_with_scheduler(col, deck_id: int, limit: int) -> bool:
-    sched = getattr(col, "sched", None)
-    if sched is None or not hasattr(sched, "update_stats"):
-        return False
-
-    base_new_limit = _base_new_limit(col, deck_id)
-    if base_new_limit is None:
-        return False
-
-    new_today = _new_count_today(col, deck_id)
-    desired_remaining = max(0, int(limit) - new_today)
-    delta = int(base_new_limit) - new_today - desired_remaining
-
-    try:
-        sched.update_stats(deck_id, new_delta=int(delta))
-        return _deck_limit_matches(col, deck_id, limit)
-    except TypeError:
-        try:
-            sched.update_stats(deck_id, int(delta))
-            return _deck_limit_matches(col, deck_id, limit)
-        except Exception:
-            return False
-    except Exception:
-        return False
 
 
 def _set_today_new_limit_on_deck(col, deck_id: int, limit: int) -> bool:
@@ -1851,9 +1760,17 @@ def _set_today_new_limit_on_deck(col, deck_id: int, limit: int) -> bool:
     base_new_limit = _base_new_limit(col, deck_id)
     updated = False
     if "newLimitToday" in deck:
-        deck["newLimitToday"] = limit
-        updated = True
-    if "extendNew" in deck:
+        current_value = deck.get("newLimitToday")
+        if isinstance(current_value, (dict, type(None))):
+            today = _scheduler_today(col)
+            if today is not None:
+                deck["newLimitToday"] = {"limit": limit, "today": today}
+                updated = True
+        else:
+            # Older Anki releases represented this as a scalar.
+            deck["newLimitToday"] = limit
+            updated = True
+    if not updated and "extendNew" in deck:
         if base_new_limit is None:
             deck["extendNew"] = limit
         else:
@@ -1877,25 +1794,32 @@ def _set_today_new_limit_on_deck(col, deck_id: int, limit: int) -> bool:
     return False
 
 
+def _scheduler_today(col) -> Optional[int]:
+    sched = getattr(col, "sched", None)
+    try:
+        return int(getattr(sched, "today"))
+    except (TypeError, ValueError):
+        return None
+
+
 def _persist_deck(col, deck: Dict[str, Any]) -> bool:
     decks = getattr(col, "decks", None)
     if decks is None:
         return False
 
-    persisted = False
-    if hasattr(decks, "save"):
-        try:
-            decks.save(deck)
-            persisted = True
-        except Exception:
-            pass
     if hasattr(decks, "update"):
         try:
             decks.update(deck)
-            persisted = True
+            return True
         except Exception:
             pass
-    return persisted
+    if hasattr(decks, "save"):
+        try:
+            decks.save(deck)
+            return True
+        except Exception:
+            pass
+    return False
 
 
 def _get_deck(col, deck_id: int) -> Optional[Dict[str, Any]]:
@@ -1925,8 +1849,22 @@ def _deck_limit_matches(col, deck_id: int, limit: int) -> bool:
     deck = _get_deck(col, deck_id)
     if not deck:
         return False
-    if deck.get("newLimitToday") == limit:
+    new_limit_today = deck.get("newLimitToday")
+    if new_limit_today == limit:
         return True
+    if isinstance(new_limit_today, dict):
+        stored_limit = new_limit_today.get("limit")
+        stored_today = new_limit_today.get("today")
+        try:
+            if (
+                stored_limit is not None
+                and stored_today is not None
+                and int(stored_limit) == limit
+                and int(stored_today) == _scheduler_today(col)
+            ):
+                return True
+        except (TypeError, ValueError):
+            pass
 
     base_new_limit = _base_new_limit(col, deck_id)
     extend_new = deck.get("extendNew")

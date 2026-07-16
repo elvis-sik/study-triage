@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import importlib
 import json
 import os
@@ -151,6 +152,7 @@ def _run_deck_menu_interaction(deck_id: int) -> dict[str, Any]:
     inactive_day = today - 1 if today > 0 else today + 1
     deck["reviewLimitToday"] = {"limit": 0, "today": inactive_day}
     mw.col.decks.update(deck)
+    review_limit_before = copy.deepcopy(deck["reviewLimitToday"])
 
     limits_before = study_triage._get_backend_deck_limits(mw.col, deck_id)
     if limits_before is None:
@@ -184,6 +186,11 @@ def _run_deck_menu_interaction(deck_id: int) -> dict[str, Any]:
         raise AssertionError("could not read smoke deck limits after interaction")
     if bool(getattr(limits_after, "review_today_active", False)):
         raise AssertionError("new-card action reactivated the stale Today-only review limit")
+    deck_after = mw.col.decks.get(deck_id)
+    if not isinstance(deck_after, dict):
+        raise AssertionError("could not reload smoke deck after interaction")
+    if deck_after.get("reviewLimitToday") != review_limit_before:
+        raise AssertionError("new-card action changed the stored Today-only review limit")
 
     return {
         "action": "Set Today's New Cards to 0",

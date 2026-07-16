@@ -65,8 +65,8 @@ AnkiWeb page: <https://ankiweb.net/shared/info/1850611434>
 ## Notes
 
 - Filtered decks are skipped by the new-card limit action.
-- The add-on uses the same deck-limit update path that the local `anki-fractional-scheduler` add-on uses to modify `Today only` new/day correctly.
-- If Anki's newer deck-config API is unavailable, the add-on falls back to older deck update mechanisms.
+- The add-on changes only the deck's `Today only` new/day field; review limits and preset settings are left untouched.
+- Compatibility paths for older Anki releases likewise use only legacy new-card-limit fields.
 - Large Good/Easy and all-deck new-limit batches are merged incrementally to
   stay inside Anki's undo-history window.
 - If an action fails, the add-on shows failure details, offers to open failed cards in the Browser, and writes details to `user_files/study-triage.log` inside the add-on folder.
