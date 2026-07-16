@@ -1802,6 +1802,13 @@ def _set_today_new_limit_via_deck_configs(col, deck_id: int, limit: int) -> bool
         req.fsrs_health_check = bool(getattr(state, "fsrs_health_check", False))
         req.configs.add().CopyFrom(selected_config)
         req.limits.CopyFrom(current_deck.limits)
+        # Anki retains the last Today-only value after it expires, and exposes
+        # that stale value alongside an inactive flag.  Its update endpoint
+        # re-dates every optional value present in the request to today, without
+        # consulting the active flag.  Do not accidentally reactivate an old
+        # review limit while changing the unrelated new-card limit.
+        if not bool(getattr(current_deck.limits, "review_today_active", False)):
+            req.limits.ClearField("review_today")
         req.limits.new_today = int(limit)
         decks.update_deck_configs(req)
     except Exception:

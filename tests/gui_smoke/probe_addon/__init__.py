@@ -141,6 +141,25 @@ def _run_deck_menu_interaction(deck_id: int) -> dict[str, Any]:
     if not study_triage._deck_limit_matches(mw.col, deck_id, setup_limit):
         raise AssertionError("smoke deck did not report the setup new-card limit")
 
+    # Reproduce an expired Today-only review limit. Anki deliberately retains
+    # the last value with a past day so the UI can offer it as a remembered
+    # value, while reporting the override as inactive.
+    deck = mw.col.decks.get(deck_id)
+    if not isinstance(deck, dict):
+        raise AssertionError("could not load smoke deck for stale-limit setup")
+    today = int(mw.col.sched.today)
+    inactive_day = today - 1 if today > 0 else today + 1
+    deck["reviewLimitToday"] = {"limit": 0, "today": inactive_day}
+    mw.col.decks.update(deck)
+
+    limits_before = study_triage._get_backend_deck_limits(mw.col, deck_id)
+    if limits_before is None:
+        raise AssertionError("could not read smoke deck limits after stale-limit setup")
+    if bool(getattr(limits_before, "review_today_active", False)):
+        raise AssertionError("stale review limit was unexpectedly active before interaction")
+    if int(getattr(limits_before, "review_today")) != 0:
+        raise AssertionError("stale review limit did not retain the expected value of 0")
+
     deck_menu = QMenu(mw)
     gui_hooks.deck_browser_will_show_options_menu(deck_menu, deck_id)
     triage_menu = _find_qmenu(deck_menu, MENU_LABEL)
@@ -160,10 +179,18 @@ def _run_deck_menu_interaction(deck_id: int) -> dict[str, Any]:
     if not study_triage._deck_limit_matches(mw.col, deck_id, 0):
         raise AssertionError("clicked menu action did not set the deck limit to 0")
 
+    limits_after = study_triage._get_backend_deck_limits(mw.col, deck_id)
+    if limits_after is None:
+        raise AssertionError("could not read smoke deck limits after interaction")
+    if bool(getattr(limits_after, "review_today_active", False)):
+        raise AssertionError("new-card action reactivated the stale Today-only review limit")
+
     return {
         "action": "Set Today's New Cards to 0",
         "before_new_today": setup_limit,
         "after_new_today": 0,
+        "stale_review_today": 0,
+        "review_today_active_after": False,
         "triggered_count": triggered["count"],
         "via": "QTest.mouseClick on deck submenu QMenu action",
     }
