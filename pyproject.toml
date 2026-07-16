@@ -1,6 +1,6 @@
 [project]
 name = "study-triage"
-version = "0.3.10"
+version = "0.3.11"
 description = "Anki add-on for study-load triage actions."
 requires-python = ">=3.10"
 dependencies = []
@@ -45,6 +45,7 @@ addon_id = "1850611434"
 title = "Study Triage: 0 New Today & Auto-Accept Cards"
 support_url = "https://github.com/elvis-sik/study-triage"
 description_file = "release/ankiweb-description.md"
+changelog_file = "CHANGELOG.md"
 login_email_env = "ANKIWEB_EMAIL"
 login_password_env = "ANKIWEB_PASSWORD"
 

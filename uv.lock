@@ -9,7 +9,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-06-17T19:29:25.178145Z"
+exclude-newer = "2026-07-09T22:04:08.314328Z"
 exclude-newer-span = "P7D"
 
 [options.exclude-newer-package]
@@ -508,7 +508,7 @@ wheels = [
 
 [[package]]
 name = "study-triage"
-version = "0.3.10"
+version = "0.3.11"
 source = { virtual = "." }
 
 [package.optional-dependencies]
