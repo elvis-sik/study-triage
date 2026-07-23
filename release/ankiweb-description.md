@@ -15,7 +15,9 @@ Notes:
 - The new-card limit uses Anki's Today only limit, so it resets automatically on the next Anki day.
 - Deck actions apply to the selected deck and its subdecks, matching Anki's deck search behavior.
 - Filtered decks can use the Good/Easy actions; the new-card limit action is only available for regular decks.
-- Actions show a count before running and try to group the change into a single Anki undo step.
+- Actions show a count before running and group the change into a single Anki undo step.
+- Good/Easy actions use Anki's native bulk grader on current releases, avoiding
+  partial batches when search order differs from the live reviewer queue.
 
 Requires Anki 2.1.55 or newer.
 

@@ -976,6 +976,19 @@ def _answer_card_ids_with_progress(
     if not background:
         _progress_start(progress_label, total)
     try:
+        native_grade_available, native_changes = _grade_card_ids_natively(
+            col, card_ids, ease
+        )
+        if native_grade_available:
+            _progress_update_for_mode(
+                progress_label,
+                total,
+                total,
+                background=background,
+            )
+            changes = _merge_op_changes(changes, native_changes)
+            return total, failed, cancelled, changes, _last_undo_step(col)
+
         for index, card_id in enumerate(card_ids, start=1):
             if _progress_cancel_requested():
                 cancelled = True
@@ -1019,6 +1032,28 @@ def _answer_card_ids_with_progress(
             _progress_finish()
 
     return answered, failed, cancelled, changes, undo_target
+
+
+def _grade_card_ids_natively(
+    col,
+    card_ids: List[int],
+    ease: int,
+) -> Tuple[bool, Any]:
+    backend = getattr(col, "_backend", None)
+    grade_now = getattr(backend, "grade_now", None)
+    if not callable(grade_now):
+        return (False, None)
+
+    # CardAnswer.Rating uses zero-based values in answer-button order:
+    # Again, Hard, Good, Easy.  Unlike answerCard(), grade_now() is designed
+    # for arbitrary selected card IDs, so it does not require each card to be
+    # at the top of the live reviewer queue.
+    rating = int(ease) - 1
+    if rating not in (0, 1, 2, 3):
+        raise ValueError(f"invalid ease: {ease}")
+
+    changes = grade_now(card_ids=[int(card_id) for card_id in card_ids], rating=rating)
+    return (True, changes)
 
 
 def _answer_card(col, card_id: int, ease: int) -> Tuple[bool, str, Any]:

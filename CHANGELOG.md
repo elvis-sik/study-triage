@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.13 - 2026-07-23
+
+- Fix Good/Easy batches leaving a few due cards behind with
+  `not at top of queue`.
+- Use Anki's native bulk grader on current releases so arbitrary search results
+  are graded atomically instead of being sent through the ordered reviewer API.
+- Preserve the older per-card compatibility path and add native-rating and
+  fallback regression coverage.
+
 ## 0.3.12 - 2026-07-23
 
 - Fix collection-wide new-card limit changes losing their custom undo target.

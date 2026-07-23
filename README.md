@@ -41,7 +41,9 @@ queued due review and learning cards Anki's scheduler would currently show for
 that deck, including review limits and sibling-burying behavior. Cards that
 belong to the deck but are currently parked in another deck, such as a filtered
 deck, are left alone. The actions show a count before running, process the batch
-with progress, and try to group the change into a single Anki undo step.
+with progress, and group the change into a single Anki undo step. On current
+Anki releases, Good/Easy actions use Anki's native bulk grader so every selected
+card can be graded even when search order differs from the live reviewer queue.
 
 ## Install
 
@@ -69,6 +71,8 @@ AnkiWeb page: <https://ankiweb.net/shared/info/1850611434>
 - Compatibility paths for older Anki releases likewise use only legacy new-card-limit fields.
 - Large Good/Easy and all-deck new-limit batches are merged incrementally to
   stay inside Anki's undo-history window.
+- Current Anki releases use the same native bulk-grading API as the Browser's
+  `Grade Now` action; older compatible releases retain the per-card fallback.
 - If an action fails, the add-on shows failure details, offers to open failed cards in the Browser, and writes details to `user_files/study-triage.log` inside the add-on folder.
 
 ## Development
