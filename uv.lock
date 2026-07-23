@@ -508,7 +508,7 @@ wheels = [
 
 [[package]]
 name = "study-triage"
-version = "0.3.11"
+version = "0.3.12"
 source = { virtual = "." }
 
 [package.optional-dependencies]

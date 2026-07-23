@@ -1807,6 +1807,15 @@ def _persist_deck(col, deck: Dict[str, Any]) -> bool:
     if decks is None:
         return False
 
+    # update_dict() records a normal, undoable user operation.  The older
+    # update() API is intended for syncing/merging and clears Anki's undo
+    # stack, which makes collection-wide changes impossible to group.
+    if hasattr(decks, "update_dict"):
+        try:
+            decks.update_dict(deck)
+            return True
+        except Exception:
+            pass
     if hasattr(decks, "update"):
         try:
             decks.update(deck)
