@@ -21,6 +21,9 @@ except ImportError:
 
 
 MENU_LABEL = "Study Triage"
+SCREENSHOT_DECK_NAME = "Spanish Vocabulary"
+SCREENSHOT_NEW_COUNT = 20
+SCREENSHOT_DUE_COUNT = 87
 EXPECTED_ACTIONS = [
     "Set Today's New Cards to 0",
     "Answer Due Cards as Good",
@@ -89,6 +92,76 @@ def _ensure_smoke_deck_id() -> int:
     assert mw.col is not None
     deck_id = int(mw.col.decks.id("Study Triage GUI Smoke"))
     mw.col.decks.set_current(deck_id)
+    return deck_id
+
+
+def _ensure_screenshot_deck_id() -> int:
+    assert mw is not None
+    assert mw.col is not None
+
+    deck_id = int(mw.col.decks.id(SCREENSHOT_DECK_NAME))
+    card_ids = list(mw.col.find_cards(f'deck:"{SCREENSHOT_DECK_NAME}"'))
+    expected_total = SCREENSHOT_NEW_COUNT + SCREENSHOT_DUE_COUNT
+    if not card_ids:
+        notetype = mw.col.models.current()
+        if notetype is None:
+            raise AssertionError("could not load the default note type for screenshot setup")
+        for index in range(expected_total):
+            note = mw.col.new_note(notetype)
+            note["Front"] = f"Spanish vocabulary prompt {index + 1}"
+            note["Back"] = f"Spanish vocabulary answer {index + 1}"
+            mw.col.add_note(note, deck_id)
+        card_ids = list(mw.col.find_cards(f'deck:"{SCREENSHOT_DECK_NAME}"'))
+
+    if len(card_ids) != expected_total:
+        raise AssertionError(
+            f"screenshot story expected {expected_total} cards, found {len(card_ids)}"
+        )
+
+    new_card_ids = list(mw.col.find_cards(f'deck:"{SCREENSHOT_DECK_NAME}" is:new'))
+    new_card_id_set = set(new_card_ids)
+    due_card_ids = [card_id for card_id in card_ids if card_id not in new_card_id_set]
+    cards_to_make_due = SCREENSHOT_DUE_COUNT - len(due_card_ids)
+    if cards_to_make_due > 0:
+        mw.col.sched.set_due_date(new_card_ids[:cards_to_make_due], "0")
+
+    mw.col.decks.set_current(deck_id)
+    counts = mw.col.sched.get_queued_cards(fetch_limit=1)
+    new_count = int(getattr(counts, "new_count", 0))
+    review_count = int(getattr(counts, "review_count", 0))
+    if (new_count, review_count) != (SCREENSHOT_NEW_COUNT, SCREENSHOT_DUE_COUNT):
+        raise AssertionError(
+            "screenshot story should show "
+            f"{SCREENSHOT_NEW_COUNT} new / {SCREENSHOT_DUE_COUNT} due, "
+            f"got {new_count} new / {review_count} due"
+        )
+
+    smoke_deck_id = mw.col.decks.id_for_name("Study Triage GUI Smoke")
+    if smoke_deck_id:
+        mw.col.decks.remove([smoke_deck_id])
+
+    deck_browser = getattr(mw, "deckBrowser", None)
+    refresh = getattr(deck_browser, "refresh", None)
+    if callable(refresh):
+        rendered = {"done": False}
+
+        def mark_rendered(browser: Any) -> None:
+            if browser is deck_browser:
+                rendered["done"] = True
+
+        gui_hooks.deck_browser_did_render.append(mark_rendered)
+        try:
+            refresh()
+            for _attempt in range(100):
+                _process_events(50)
+                if rendered["done"]:
+                    break
+        finally:
+            gui_hooks.deck_browser_did_render.remove(mark_rendered)
+
+        if not rendered["done"]:
+            raise AssertionError("deck browser did not render the screenshot story")
+        _process_events(250)
     return deck_id
 
 
@@ -327,7 +400,7 @@ def _grab_menu_screenshot():
     QToolTip.hideText()
     _hide_transient_widgets()
     _process_events(100)
-    deck_id = _ensure_smoke_deck_id()
+    deck_id = _ensure_screenshot_deck_id()
 
     deck_menu = QMenu(mw)
     gui_hooks.deck_browser_will_show_options_menu(deck_menu, deck_id)
@@ -347,6 +420,10 @@ def _grab_menu_screenshot():
     triage_menu.adjustSize()
     triage_menu.popup(deck_menu.mapToGlobal(triage_rect.topRight()))
     _process_events(250)
+    deck_menu.show()
+    deck_menu.raise_()
+    triage_menu.raise_()
+    _process_events(100)
 
     try:
         screen = mw.screen() or QApplication.primaryScreen()

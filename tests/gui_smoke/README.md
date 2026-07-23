@@ -16,6 +16,13 @@ bridge and context menu builder. The JSON result includes the clicked action,
 signal count, bridge assertion, and before/after deck limit assertion before
 Anki quits.
 
+The public screenshot lane tells a concrete user story instead of reusing the
+empty technical smoke deck: a `Spanish Vocabulary` deck has 20 new cards and
+87 due reviews, and the Study Triage menu is open at the point where the user
+decides how to reduce today's workload. The probe asserts those exact scheduler
+counts and waits for the updated deck browser to render before capturing, so an
+empty or stale screenshot fails the run.
+
 ## Host Run
 
 ```sh
