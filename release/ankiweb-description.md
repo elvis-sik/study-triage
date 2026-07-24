@@ -21,6 +21,6 @@ Notes:
 
 Requires Anki 2.1.55 or newer.
 
-<img src="https://raw.githubusercontent.com/elvis-sik/study-triage/main/docs/study-triage-workbench.png" alt="Study Triage deck menu screenshot">
+<img src="https://raw.githubusercontent.com/ritornello-labs/study-triage/main/docs/study-triage-workbench.png" alt="Study Triage deck menu screenshot">
 
 Source and issue tracker: [https://github.com/ritornello-labs/study-triage](https://github.com/ritornello-labs/study-triage)
