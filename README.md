@@ -1,7 +1,7 @@
 # Study Triage
 
 [![AnkiWeb add-on 1850611434](https://img.shields.io/badge/AnkiWeb-1850611434-2f80ed)](https://ankiweb.net/shared/info/1850611434)
-[![Source on GitHub](https://img.shields.io/badge/source-GitHub-24292f)](https://github.com/elvis-sik/study-triage)
+[![Source on GitHub](https://img.shields.io/badge/source-GitHub-24292f)](https://github.com/ritornello-labs/study-triage)
 ![Anki 2.1.55+](https://img.shields.io/badge/Anki-%3E%3D2.1.55-4caf50)
 
 Study Triage is an Anki add-on that adds quick triage actions for days when you need to reduce today's study load.
@@ -132,7 +132,7 @@ stays open until you press Enter in the terminal.
 Use `make release-login` to refresh the browser-profile login, or
 `make release-publish` to refill the publish form after login is already valid.
 The dedicated publishing-account pattern is documented in
-[`anki-addon-release`](https://github.com/elvis-sik/anki-addon-release#separate-publishing-account).
+[`anki-addon-release`](https://github.com/ritornello-labs/anki-addon-release#separate-publishing-account).
 If AnkiWeb says the dedicated account is too new, it is hitting AnkiWeb's
 [new-account sharing guard](https://ankiweb.net/shared/too-new). AnkiWeb does
 not publish an exact wait period there, so create the account before you need it
